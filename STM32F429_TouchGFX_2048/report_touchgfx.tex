@@ -1,0 +1,269 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T5]{fontenc}
+\usepackage[vietnamese]{babel}
+\usepackage{geometry}
+\usepackage{setspace}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,shapes.geometric}
+
+\geometry{left=3cm,right=2cm,top=2.5cm,bottom=2.5cm}
+\onehalfspacing
+\hypersetup{colorlinks=true,linkcolor=black,urlcolor=blue,citecolor=black}
+
+\lstdefinestyle{cppstyle}{
+    language=C++,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red!60!black},
+    commentstyle=\color{green!40!black},
+    showstringspaces=false,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    tabsize=4
+}
+
+\begin{document}
+
+\begin{titlepage}
+    \begin{center}
+        \textbf{\large ĐẠI HỌC BÁCH KHOA HÀ NỘI}\\
+        \textbf{\large TRƯỜNG CÔNG NGHỆ THÔNG TIN \& TRUYỀN THÔNG}\\
+        \vspace{1.2cm}
+
+        \IfFileExists{logo.jpg}{\includegraphics[width=4cm]{logo.jpg}\\}{}
+        \vspace{1.2cm}
+
+        \textbf{\Large BÁO CÁO PROJECT CUỐI KỲ}\\
+        \vspace{0.5cm}
+        \textbf{\LARGE GAME 2048 TRÊN STM32F429ZIT6}\\
+        \textbf{\Large STM32CubeIDE + TouchGFX}\\
+        \vspace{1.2cm}
+
+        \begin{tabular}{rll}
+            \textbf{Môn học :} & \multicolumn{2}{l}{\textit{[Điền tên môn học]}} \\
+            \textbf{Mã lớp :} & \multicolumn{2}{l}{\textit{[Điền mã lớp]}} \\
+            \textbf{Đề tài :} & \multicolumn{2}{l}{Game 2048 trên STM32F429ZIT6} \\
+            \textbf{Sinh viên thực hiện :} & Phạm Hải Nam & 20235791 \\
+            & Bùi Huy Hoàng & 20235719 \\
+            & Lê Anh Vũ & 20235877 \\
+            & Nguyễn Chấn Phong & 20235806 \\
+            \textbf{Giảng viên hướng dẫn :} & \multicolumn{2}{l}{\textit{[Điền tên giảng viên]}} \\
+        \end{tabular}
+
+        \vfill
+        \textbf{Hà Nội, tháng 07 năm 2026}
+    \end{center}
+\end{titlepage}
+
+\newpage
+\tableofcontents
+\newpage
+
+\section{Giới thiệu đề tài}
+
+Project xây dựng game 2048 chạy trên vi điều khiển STM32F429ZIT6, sử dụng màn hình và cảm ứng onboard của board. Giao diện được xây dựng bằng TouchGFX, project được phát triển trong STM32CubeIDE. Người chơi điều khiển game bằng thao tác vuốt trực tiếp trên màn hình cảm ứng.
+
+Mục tiêu là xây dựng một ứng dụng nhúng có giao diện đồ họa, có xử lý cảm ứng, có logic game hoàn chỉnh và phù hợp với các công cụ đã học trong chương trình: STM32CubeIDE, cấu hình ngoại vi bằng CubeMX và thiết kế giao diện bằng TouchGFX.
+
+\subsection{Yêu cầu chức năng}
+
+\begin{itemize}
+    \item Hiển thị game 2048 trên màn hình onboard.
+    \item Hỗ trợ board 3x3, 4x4, 5x5 và 6x6.
+    \item Điều khiển 4 hướng bằng thao tác swipe trên màn cảm ứng.
+    \item Gộp ô đúng quy tắc, mỗi ô chỉ được gộp một lần trong một lượt.
+    \item Chỉ sinh ô mới sau lượt di chuyển hợp lệ.
+    \item Tính điểm, phát hiện thắng khi đạt 2048 và phát hiện hết nước đi.
+    \item Có undo nhiều bước và restart.
+    \item Có menu/pause ở mức giao diện TouchGFX.
+    \item Có animation hoặc phản hồi hình ảnh đơn giản khi trạng thái game thay đổi.
+\end{itemize}
+
+\subsection{Giới hạn phần cứng}
+
+Nhóm chỉ sử dụng STM32F429ZIT6 và các thành phần cơ bản/onboard. Do board không có buzzer onboard, chức năng âm báo vật lý không được cài đặt trong phiên bản này. Thay vào đó, project sử dụng phản hồi hình ảnh trên màn hình như thay đổi trạng thái, thông báo win/game over hoặc hiệu ứng cập nhật board. Nếu được phép bổ sung buzzer ngoài, có thể mở rộng bằng PWM timer.
+
+\section{Thiết kế}
+
+\subsection{Phân chia chức năng}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{4cm}p{10cm}}
+        \toprule
+        \textbf{Thành phần} & \textbf{Vai trò} \\
+        \midrule
+        STM32F429ZIT6 & Xử lý logic game, sự kiện cảm ứng và điều phối giao diện. \\
+        LCD onboard & Hiển thị board, điểm số, menu và trạng thái game. \\
+        Touch onboard & Nhận thao tác chạm/vuốt của người chơi. \\
+        TouchGFX & Xây dựng giao diện, widget, screen và xử lý sự kiện touch. \\
+        Game engine & Cài đặt luật 2048 độc lập với phần cứng. \\
+        \bottomrule
+    \end{tabular}
+    \caption{Phân chia chức năng hệ thống}
+\end{table}
+
+\subsection{Sơ đồ khối}
+
+\begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[
+        block/.style={rectangle, draw, rounded corners, align=center, minimum width=3.3cm, minimum height=1cm},
+        arrow/.style={-{Latex}, thick},
+        node distance=1.4cm and 1.8cm
+    ]
+        \node[block] (touch) {Touch onboard};
+        \node[block, right=of touch] (tgfx) {TouchGFX\\Screen/View};
+        \node[block, right=of tgfx] (engine) {Game2048\\Engine};
+        \node[block, below=of tgfx] (lcd) {LCD onboard};
+        \node[block, below=of engine] (state) {Score / Undo\\Game state};
+
+        \draw[arrow] (touch) -- (tgfx);
+        \draw[arrow] (tgfx) -- (engine);
+        \draw[arrow] (engine) -- (tgfx);
+        \draw[arrow] (tgfx) -- (lcd);
+        \draw[arrow] (engine) -- (state);
+    \end{tikzpicture}
+    \caption{Sơ đồ khối phiên bản TouchGFX}
+\end{figure}
+
+\subsection{Thiết kế phần mềm}
+
+Project được chia thành hai lớp:
+
+\begin{itemize}
+    \item Lớp logic game: \texttt{Game2048Engine}, viết bằng C++ thuần, quản lý board, merge, score, undo, win/game over và sinh ô mới ngẫu nhiên.
+    \item Lớp giao diện TouchGFX: \texttt{Screen1View}, nhận sự kiện touch, xác định hướng swipe, gọi engine xử lý lượt đi và vẽ lại board.
+\end{itemize}
+
+Việc tách engine khỏi giao diện giúp phần luật chơi không phụ thuộc vào TouchGFX hoặc HAL. Khi cần đổi màn hình hoặc đổi giao diện, engine vẫn có thể dùng lại.
+
+\section{Cài đặt}
+
+\subsection{Cấu trúc mã nguồn}
+
+\begin{itemize}
+    \item \texttt{Core/Game2048Engine.hpp}: khai báo engine game.
+    \item \texttt{Core/Game2048Engine.cpp}: cài đặt luật 2048.
+    \item \texttt{TouchGFX\_Screen/GameScreenView.hpp}: mẫu khai báo View cho TouchGFX.
+    \item \texttt{TouchGFX\_Screen/GameScreenView.cpp}: mẫu xử lý touch, swipe và vẽ board.
+    \item \texttt{README.md}: hướng dẫn tích hợp vào STM32CubeIDE + TouchGFX.
+\end{itemize}
+
+\subsection{Xử lý swipe}
+
+TouchGFX gửi sự kiện \texttt{ClickEvent} khi người dùng nhấn và thả tay trên màn hình. Project lưu tọa độ bắt đầu, sau đó tính độ lệch khi thả tay:
+
+\begin{lstlisting}[style=cppstyle]
+int16_t dx = event.getX() - dragStartX_;
+int16_t dy = event.getY() - dragStartY_;
+
+if (abs(dx) > 45 || abs(dy) > 45) {
+    if (abs(dx) > abs(dy)) {
+        applyMove(dx > 0 ? Direction::Right : Direction::Left);
+    } else {
+        applyMove(dy > 0 ? Direction::Down : Direction::Up);
+    }
+}
+\end{lstlisting}
+
+\subsection{Luồng hoạt động}
+
+\begin{algorithm}[H]
+\caption{Luồng xử lý game 2048 với TouchGFX}
+\begin{algorithmic}[1]
+\State TouchGFX khởi tạo màn hình và gọi \texttt{setupScreen()}.
+\State Engine tạo ván mới với board mặc định 4x4.
+\While{ứng dụng đang chạy}
+    \State Người dùng chạm/vuốt trên màn hình.
+    \State View nhận sự kiện touch từ TouchGFX.
+    \State View xác định hướng vuốt.
+    \State Engine xử lý lượt di chuyển.
+    \If{lượt đi hợp lệ}
+        \State Cập nhật board, score, trạng thái win/game over.
+        \State View vẽ lại board và điểm số.
+    \EndIf
+\EndWhile
+\end{algorithmic}
+\end{algorithm}
+
+\subsection{Đóng góp của từng thành viên}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{llp{7cm}c}
+        \toprule
+        \textbf{MSSV} & \textbf{Họ tên} & \textbf{Nhiệm vụ chính} & \textbf{Đóng góp} \\
+        \midrule
+        20235791 & Phạm Hải Nam & Logic game, luật gộp ô, undo, thắng/thua. & 25\% \\
+        20235719 & Bùi Huy Hoàng & Giao diện TouchGFX, layout board, score, status. & 25\% \\
+        20235877 & Lê Anh Vũ & Tích hợp STM32CubeIDE, touch onboard, kiểm thử swipe. & 25\% \\
+        20235806 & Nguyễn Chấn Phong & README, báo cáo, đánh giá yêu cầu và demo. & 25\% \\
+        \bottomrule
+    \end{tabular}
+    \caption{Phân công công việc}
+\end{table}
+
+\section{Kết quả và đánh giá}
+
+\subsection{Kết quả đạt được}
+
+Project đã xây dựng được phiên bản game 2048 cho STM32F429ZIT6 sử dụng màn hình/touch onboard và TouchGFX. Các chức năng chính gồm: hiển thị board, điều khiển bằng swipe, gộp ô đúng luật, sinh ô mới sau lượt hợp lệ, tính điểm, phát hiện thắng/thua, undo và restart.
+
+Link GitHub: \url{[Điền link GitHub]}.
+
+Link video demo: \url{[Điền link video demo]}.
+
+\subsection{Đánh giá}
+
+\begin{table}[H]
+    \centering
+    \begin{tabular}{p{8cm}p{4cm}p{2cm}}
+        \toprule
+        \textbf{Yêu cầu} & \textbf{Hiện trạng} & \textbf{Đánh giá} \\
+        \midrule
+        Chạy trên STM32F429ZIT6 & Dùng STM32CubeIDE + TouchGFX & Đạt \\
+        Dùng màn/touch onboard & Không cần module ngoài & Đạt \\
+        Điều khiển bằng swipe & Xử lý bằng ClickEvent/DragEvent & Đạt \\
+        Board nhiều kích thước & 3x3 đến 6x6 & Đạt \\
+        Gộp đúng luật 2048 & Engine riêng & Đạt \\
+        Sinh ô mới sau lượt hợp lệ & Có kiểm tra moved & Đạt \\
+        Tính điểm, thắng/thua & Có & Đạt \\
+        Undo/restart & Có & Đạt \\
+        Buzzer & Không có buzzer onboard & Không áp dụng nếu không thêm phần cứng \\
+        \bottomrule
+    \end{tabular}
+    \caption{Đánh giá mức độ đáp ứng yêu cầu}
+\end{table}
+
+\section{AI-assisted disclaimer}
+
+Nhóm khẳng định \textbf{CÓ} sử dụng công cụ AI ở mức hỗ trợ trong quá trình thực hiện project. AI được dùng để gợi ý cách tách engine game khỏi giao diện TouchGFX, gợi ý cách xử lý swipe từ sự kiện touch, rà soát checklist yêu cầu và gợi ý cấu trúc báo cáo. Báo cáo và demo cuối cùng do nhóm tự kiểm tra, chỉnh sửa và chịu trách nhiệm.
+
+Các prompt chính:
+
+\begin{itemize}
+    \item ``STM32F429ZIT6 dùng màn/touch onboard có thể điều khiển game 2048 bằng swipe không?''
+    \item ``Gợi ý cách viết engine 2048 thuần C++ để tích hợp vào TouchGFX.''
+    \item ``Gợi ý cách xử lý ClickEvent trong TouchGFX để suy ra hướng vuốt.''
+    \item ``Gợi ý báo cáo LaTeX cho project STM32CubeIDE + TouchGFX dùng màn/touch onboard.''
+\end{itemize}
+
+\section{Kết luận}
+
+Phiên bản STM32F429ZIT6 + TouchGFX phù hợp hơn với phần cứng thực tế của nhóm vì tận dụng màn hình và cảm ứng onboard, không yêu cầu module hiển thị hoặc touch rời. Project đáp ứng các chức năng chính của game 2048 và thể hiện được việc sử dụng công cụ STM32CubeIDE, TouchGFX, xử lý touch và lập trình C++ trên hệ thống nhúng.
+
+\end{document}
