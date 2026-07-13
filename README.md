@@ -69,7 +69,7 @@ Nếu bạn cần chỉnh sửa, thiết kế lại giao diện game:
 
 ### Bước 3: Mở project bằng STM32CubeIDE
 1. Mở **STM32CubeIDE v2.2.0**.
-2. Mở dự án bằng cách mở trực tiếp file `.project` tại thư mục `STM32CubeIDE` trong thư mục repo GitHub vừa clone về máy (đường dẫn ví dụ: `C:\Users\admin\Documents\GitHub\game-2048\STM32CubeIDE\.project`), hoặc chọn `File > Open Projects from File System...` trong STM32CubeIDE và chỉ tới thư mục `STM32CubeIDE`.
+2. Mở dự án bằng cách mở trực tiếp file `.project` tại thư mục `STM32CubeIDE` trong thư mục repo GitHub vừa clone về máy (`game-2048\STM32CubeIDE\.project`), hoặc chọn `File > Open Projects from File System...` trong STM32CubeIDE và chỉ tới thư mục `STM32CubeIDE`.
 3. Nhấp chuột phải vào tên project `STM32F429I-DISCO` trong giao diện Project Explorer và chọn `Refresh`.
 
 ### Bước 4: Biên dịch và nạp code (Build & Run)
@@ -80,7 +80,7 @@ Nếu bạn cần chỉnh sửa, thiết kế lại giao diện game:
 
 ---
 
-## 🎮 Hướng dẫn chơi & Các chức năng chính
+## Hướng dẫn chơi & Các chức năng chính
 
 ### 1. Cách chơi cơ bản
 *   **Điều khiển:** Người chơi thực hiện thao tác vuốt (swipe gesture) theo 4 hướng: **Lên, Xuống, Trái, Phải** ở bất kỳ vùng trống nào trên màn hình cảm ứng để di chuyển và gộp các ô số.
@@ -104,7 +104,7 @@ Nhấn nút **MENU** để mở bảng điều khiển:
 
 ---
 
-## 📺 Video ghi lại hoạt động thực tế
+## Video ghi lại hoạt động thực tế
 
 *   **Các chức năng chơi cơ bản & chuyển chế độ lưới:** [Link Video Youtube](https://youtube.com/shorts/GAm-MwbM3Wo?feature=share) 
 *   **Các phím chức năng undo, save, load, new:** [Link Video Youtube](https://youtube.com/shorts/NjY-U0CGxY0) 
