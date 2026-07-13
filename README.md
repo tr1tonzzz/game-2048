@@ -41,6 +41,11 @@ repository/
 │
 ├── docs/                       # Tài liệu báo cáo
 │   ├── BaoCao_CuoiKy_Nhom68.pdf # File báo cáo PDF đã biên dịch hoàn chỉnh
+│   ├── report-game2048.tex     # File nguồn LaTeX của báo cáo
+│   ├── logo.jpg                # Logo trường dùng cho LaTeX
+│   ├── anh1.jpg                # Ảnh chụp Theme Classic (dùng cho báo cáo)
+│   ├── anh2.jpg                # Ảnh chụp Theme Dark (dùng cho báo cáo)
+│   └── anh3.jpg                # Ảnh chụp Theme Blue/Neon (dùng cho báo cáo)
 ├── .gitignore                  # File cấu hình bỏ qua các file build sinh ra tự động (Debug/, build/)
 ├── STM32F429I_DISCO_REV_D01.ioc # File cấu hình STM32CubeMX
 └── README.md                   # Tài liệu hướng dẫn này
@@ -56,10 +61,11 @@ Sử dụng Git để tải mã nguồn dự án về máy của bạn:
 git clone <URL_REPOS_CUA_BAN>
 ```
 
-### Bước 2: Tạo code giao diện bằng TouchGFX Designer
-1. Tải và cài đặt **TouchGFX Designer v4.22.0**.
-2. Điều hướng vào thư mục dự án và kích đúp mở file `TouchGFX/MyApplication_2.touchgfx`.
-3. Nhấn nút **Generate Code** (ở góc dưới cùng bên phải màn hình TouchGFX Designer) để công cụ tự động tạo mã nguồn giao diện tương thích.
+### Bước 2: (Tùy chọn) Tạo code giao diện bằng TouchGFX Designer
+*Lưu ý: Toàn bộ thư mục `generated` và thư viện TouchGFX đã được nhóm đẩy sẵn lên GitHub, vì vậy thành viên khác **KHÔNG BẮT BUỘC** phải cài đặt TouchGFX Designer hoặc chạy Generate Code, vẫn có thể mở STM32CubeIDE build dự án bình thường.*
+Nếu bạn cần chỉnh sửa, thiết kế lại giao diện game:
+1. Mở file `TouchGFX/MyApplication_2.touchgfx` bằng **TouchGFX Designer v4.26.0 trở lên**.
+2. Thực hiện sửa đổi giao diện và nhấn nút **Generate Code** (phím `F4`) ở góc dưới phải màn hình để tự động cập nhật mã nguồn giao diện.
 
 ### Bước 3: Mở project bằng STM32CubeIDE
 1. Mở **STM32CubeIDE v2.2.0**.

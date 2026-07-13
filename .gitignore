@@ -5,13 +5,13 @@ backup_*.ioc
 # TouchGFX
 TouchGFX/*_backup.touchgfx
 TouchGFX/build/
-TouchGFX/config/
-TouchGFX/generated/
+# TouchGFX/config/
+# TouchGFX/generated/
 TouchGFX/simulator/
 TouchGFX/target.config
-Middlewares/ST/touchgfx/
-Middlewares/ST/touchgfx_components/
-Middlewares/ST/touchgfx_backup*/
+# Middlewares/ST/touchgfx/
+# Middlewares/ST/touchgfx_components/
+# Middlewares/ST/touchgfx_backup*/
 gcc/components.mk
 
 # IAR
